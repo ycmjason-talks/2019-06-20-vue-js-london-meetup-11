@@ -3,6 +3,7 @@
     <p>Hi Vue.js London. Welcome to my AMAZING WEBSITE.</p>
 
     <!-- 1. mario kart -->
+    <RequestAnimationFrame @frame="marioKartTick"></RequestAnimationFrame>
     <fieldset>
       <legend>Control the speed of the mario</legend>
       <input type="range" min="0" max="100" v-model="marioKartSpeed">
@@ -28,19 +29,20 @@
 <script>
 import MarioKart from './MarioKart.vue';
 import LogoutModal from './LogoutModal.vue';
+import RequestAnimationFrame from './renderless/RequestAnimationFrame';
 import lorem from '../services/lorem';
-import recursiveRequestAnimationFrame from '../services/recursiveRequestAnimationFrame';
 
 const MARIO_KART_MAX_PX_PER_MS = 0.5;
 const LOGOUT_PROMPT_TIMEOUT_MS = 10000;
 
 export default {
-  components: { MarioKart, LogoutModal },
+  components: {
+    MarioKart,
+    LogoutModal,
+    RequestAnimationFrame,
+  },
 
   mounted() {
-    // 1
-    this.cancelAnimationFrame = recursiveRequestAnimationFrame(this.marioKartTick);
-
     // 2
     const { loremTrigger, loremsContainer } = this.$refs;
 
@@ -55,9 +57,6 @@ export default {
   },
 
   beforeDestroy() {
-    // 1
-    this.cancelAnimationFrame();
-
     // 2
     this.observer.disconnect();
 
@@ -80,8 +79,7 @@ export default {
 
   methods: {
     // 1
-    marioKartTick() {
-      const msElapsed = window.performance.now() - this.marioKartXLastUpdatedTime;
+    marioKartTick(msElapsed) {
       const pxPerMs = (this.marioKartSpeed * MARIO_KART_MAX_PX_PER_MS) / 100;
       this.marioKartY = (this.marioKartY + pxPerMs * msElapsed) % 100;
       this.marioKartXLastUpdatedTime = window.performance.now();
