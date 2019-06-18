@@ -16,6 +16,7 @@
       <p v-for="(paragraph, i) of paragraphs" :key="i">{{ paragraph }}</p>
       <div ref="loremTrigger">Loading...</div>
     </article>
+    <IntersectionObserver :rootRef="() => $refs.loremsContainer" :targetRef="() => $refs.loremTrigger" @intersect-enter="fetchMoreLorem"></IntersectionObserver>
 
     <!-- 3. logout modal -->
     <LogoutModal :opened="logoutModalOpened">
@@ -30,6 +31,7 @@
 import MarioKart from './MarioKart.vue';
 import LogoutModal from './LogoutModal.vue';
 import RequestAnimationFrame from './renderless/RequestAnimationFrame';
+import IntersectionObserver from './renderless/IntersectionObserver';
 import lorem from '../services/lorem';
 
 const MARIO_KART_MAX_PX_PER_MS = 0.5;
@@ -40,26 +42,15 @@ export default {
     MarioKart,
     LogoutModal,
     RequestAnimationFrame,
+    IntersectionObserver,
   },
 
   mounted() {
-    // 2
-    const { loremTrigger, loremsContainer } = this.$refs;
-
-    this.observer = new window.IntersectionObserver(
-      ([{ isIntersecting }]) => isIntersecting && this.fetchMoreLorem(),
-      { root: loremsContainer },
-    );
-    this.observer.observe(loremTrigger);
-
     // 3
     this.restartLogoutPromptTimeout();
   },
 
   beforeDestroy() {
-    // 2
-    this.observer.disconnect();
-
     // 3
     window.clearInterval(this.autoLogoutTimeoutId);
   },
