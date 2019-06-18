@@ -22,8 +22,9 @@
     <LogoutModal :opened="logoutModalOpened">
       <p>You have logged in for 10 seconds. Do you want to logout?</p>
       <button @click="$emit('logout')">Yes</button>
-      <button @click="restartLogoutPromptTimeout">No</button>
+      <button @click="logoutModalOpened = false">No</button>
     </LogoutModal>
+    <Timeout :delay="logoutTimeoutDelay" @timeout="logoutModalOpened = true" v-if="!logoutModalOpened"></Timeout>
   </main>
 </template>
 
@@ -32,6 +33,7 @@ import MarioKart from './MarioKart.vue';
 import LogoutModal from './LogoutModal.vue';
 import RequestAnimationFrame from './renderless/RequestAnimationFrame';
 import IntersectionObserver from './renderless/IntersectionObserver';
+import Timeout from './renderless/Timeout';
 import lorem from '../services/lorem';
 
 const MARIO_KART_MAX_PX_PER_MS = 0.5;
@@ -43,16 +45,7 @@ export default {
     LogoutModal,
     RequestAnimationFrame,
     IntersectionObserver,
-  },
-
-  mounted() {
-    // 3
-    this.restartLogoutPromptTimeout();
-  },
-
-  beforeDestroy() {
-    // 3
-    window.clearInterval(this.autoLogoutTimeoutId);
+    Timeout,
   },
 
   data: () => ({
@@ -66,6 +59,7 @@ export default {
 
     //3
     logoutModalOpened: false,
+    logoutTimeoutDelay: LOGOUT_PROMPT_TIMEOUT_MS,
   }),
 
   methods: {
@@ -79,15 +73,6 @@ export default {
     // 2
     async fetchMoreLorem() {
       this.paragraphs = this.paragraphs.concat(await lorem.ipsum());
-    },
-
-    // 3
-    restartLogoutPromptTimeout() {
-      this.logoutModalOpened = false;
-      this.autoLogoutTimeoutId = window.setTimeout(
-        () => (this.logoutModalOpened = true),
-        LOGOUT_PROMPT_TIMEOUT_MS,
-      );
     },
   },
 };
