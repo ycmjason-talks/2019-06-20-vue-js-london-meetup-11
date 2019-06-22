@@ -1,5 +1,7 @@
 <template>
   <footer :style="footerStyle">
+    <Interval :delay="footerIntervalMs" @tick="randomFooterStyle" immediate></Interval>
+    <Interval :delay="textIntervalMs" @tick="randomTextStyle" immediate></Interval>
     <div class="text" :style="textStyle">Made with ❤ by Jason Yu &copy; 2019</div>
     <label class="insane-mode-label">
       <input type="checkbox" v-model="insaneMode"> Insane Mode (new!)
@@ -9,23 +11,13 @@
 
 <script>
 import { randomNumber, randomPercentage, randomColor } from '../services/random';
+import Interval from './renderless/Interval';
 
 const FOOTER_INTERVAL_MS = 543;
 const TEXT_INTERVAL_MS = FOOTER_INTERVAL_MS / 3;
 
 export default {
-  mounted() {
-    this.randomFooterStyle();
-    this.randomTextStyle();
-
-    this.footerIntervalId = window.setInterval(this.randomFooterStyle, this.footerIntervalMs);
-    this.textIntervalId = window.setInterval(this.randomTextStyle, this.textIntervalMs);
-  },
-
-  beforeDestroy() {
-    window.clearInterval(this.footerIntervalId);
-    window.clearInterval(this.textIntervalId);
-  },
+  components: { Interval },
 
   data: () => ({
     footerStyle: null,
@@ -44,16 +36,6 @@ export default {
 
     textIntervalMs() {
       return FOOTER_INTERVAL_MS / this.insaneFactor;
-    },
-  },
-
-  watch: {
-    insaneMode() {
-      window.clearInterval(this.footerIntervalId);
-      window.clearInterval(this.textIntervalId);
-
-      this.footerIntervalId = window.setInterval(this.randomFooterStyle, this.footerIntervalMs);
-      this.textIntervalId = window.setInterval(this.randomTextStyle, this.textIntervalMs);
     },
   },
 
